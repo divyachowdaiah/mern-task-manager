@@ -4,18 +4,24 @@ import { Link } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import Loader from './utils/Loader';
 import Tooltip from './utils/Tooltip';
-import './Tasks.css'; // Import CSS file
+import TaskDetailModal from './TaskDetailModal';  // Import the modal component
+import './Tasks.css';
 
 const Tasks = () => {
   const authState = useSelector(state => state.authReducer);
   const [tasks, setTasks] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showSearch, setShowSearch] = useState(false); // Controls search bar visibility
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedTask, setExpandedTask] = useState(null);
+  const [filter, setFilter] = useState({ priority: '', status: '', dueDate: '' });
   const [fetchData, { loading }] = useFetch();
+  const [showModal, setShowModal] = useState(false);  // State to manage modal visibility
+  const [selectedTask, setSelectedTask] = useState(null);  // Store selected task for modal
 
   const fetchTasks = useCallback(() => {
-    const config = { url: "/tasks", method: "get", headers: { Authorization: authState.token } };
-    fetchData(config, { showSuccessToast: false }).then(data => setTasks(data.tasks));
+    const config = { url: '/tasks', method: 'get', headers: { Authorization: authState.token } };
+    fetchData(config, { showSuccessToast: false }).then(data => {
+      if (data.tasks) setTasks(data.tasks);
+    });
   }, [authState.token, fetchData]);
 
   useEffect(() => {
@@ -24,37 +30,62 @@ const Tasks = () => {
   }, [authState.isLoggedIn, fetchTasks]);
 
   const handleDelete = (id) => {
-    const config = { url: `/tasks/${id}`, method: "delete", headers: { Authorization: authState.token } };
+    const config = { url: `/tasks/${id}`, method: 'delete', headers: { Authorization: authState.token } };
     fetchData(config).then(() => fetchTasks());
   };
 
-  // Filter tasks based on search input
+  const toggleCompletion = (task) => {
+    const updatedTask = { ...task, status: task.status === 'Completed' ? 'Pending' : 'Completed' };
+    const config = { url: `/tasks/${task._id}`, method: 'put', data: updatedTask, headers: { Authorization: authState.token } };
+    fetchData(config).then(() => fetchTasks());
+  };
+
+  const handleExpand = (task) => {
+    setSelectedTask(task);  // Store task for modal
+    setShowModal(true);  // Show the modal
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);  // Close the modal
+  };
+
+  const handleFilterChange = (e) => {
+    setFilter({ ...filter, [e.target.name]: e.target.value });
+  };
+
   const filteredTasks = tasks.filter(task =>
-    task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    task.description.toLowerCase().includes(searchQuery.toLowerCase())
+    (task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      task.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
+    (filter.priority ? task.priority === filter.priority : true) &&
+    (filter.status ? task.status === filter.status : true) &&
+    (filter.dueDate ? task.dueDate?.startsWith(filter.dueDate) : true)
   );
 
   return (
     <div className="tasks-container">
       <h2 className="tasks-header">Your tasks ({filteredTasks.length})</h2>
 
-      {/* Search Icon (Click to Toggle Search Bar) */}
-      <div className="search-container">
-        <i
-          className="fa fa-search search-icon"
-          onClick={() => setShowSearch(!showSearch)}
-        ></i>
-
-        {showSearch && (
-          <input
-            type="text"
-            placeholder="Search tasks..."
-            className="search-bar"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            autoFocus
-          />
-        )}
+      <div className="filter-container">
+        <input
+          type="text"
+          placeholder="Search tasks..."
+          className="search-bar"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <select name="priority" onChange={handleFilterChange} className="filter-select">
+          <option value="">All Priorities</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+        </select>
+        <select name="status" onChange={handleFilterChange} className="filter-select">
+          <option value="">All Statuses</option>
+          <option value="Pending">Pending</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
+        </select>
+        <input type="date" name="dueDate" onChange={handleFilterChange} className="filter-date" />
       </div>
 
       {loading ? (
@@ -67,18 +98,23 @@ const Tasks = () => {
               <Link to="/tasks/add" className="add-task-button">+ Add new task</Link>
             </div>
           ) : (
-            filteredTasks.map((task, index) => (
-              <div key={task._id} className="task-item">
+            filteredTasks.map(task => (
+              <div key={task._id} className={`task-item ${task.status.toLowerCase()}`}>
                 <div className="task-header">
-                  <span className="task-title">{task.title || `Task #${index + 1}`}</span>
-
+                  <span className="task-title" onClick={() => handleExpand(task)}>
+                    {task.title}
+                  </span>
                   <div className="task-actions">
+                    <Tooltip text="Toggle Completion" position="top">
+                      <span className="task-toggle" onClick={() => toggleCompletion(task)}>
+                        {task.status === 'Completed' ? '✅' : '🔲'}
+                      </span>
+                    </Tooltip>
                     <Tooltip text="Edit this task" position="top">
                       <Link to={`/tasks/${task._id}`} className="task-edit">
                         <i className="fa-solid fa-pen"></i>
                       </Link>
                     </Tooltip>
-
                     <Tooltip text="Delete this task" position="top">
                       <span className="task-delete" onClick={() => handleDelete(task._id)}>
                         <i className="fa-solid fa-trash"></i>
@@ -86,18 +122,14 @@ const Tasks = () => {
                     </Tooltip>
                   </div>
                 </div>
-
-                <div className="task-details">
-                  <p><strong>Description:</strong> {task.description}</p>
-                  <p><strong>Due Date:</strong> {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : 'N/A'}</p>
-                  <p><strong>Priority:</strong> {task.priority}</p>
-                  <p><strong>Status:</strong> {task.status}</p>
-                  <p><strong>Category:</strong> {task.category}</p>
-                </div>
               </div>
             ))
           )}
         </div>
+      )}
+
+      {showModal && selectedTask && (
+        <TaskDetailModal task={selectedTask} onClose={handleCloseModal} />
       )}
     </div>
   );

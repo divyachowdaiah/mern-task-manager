@@ -2,53 +2,86 @@
 .login-form-container {
     margin: auto;
     margin-top: 4rem;
-    max-width: 500px;
-    background: rgb(191, 229, 232);
-    padding: 2rem;
-    border: 2px solid #0cdcef;
-    box-shadow: 0 4px 6px rgb(16, 15, 15);
-    border-radius: 0.5rem;
-  }
-  
-  .login-form-container h2 {
+    max-width: 450px;
+    background: #f4f7fa; 
+    padding: 2.5rem;
+    border: 2px solid #171616;
+    box-shadow: 0 4px 8px rgba(0, 0, 0);
+    border-radius: 0.75rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-form-container h2 {
     text-align: center;
-    margin-bottom: 1rem;
-  }
-  
-  .login-form-container label {
+    margin-bottom: 1.5rem;
+    color: #333333;
+}
+
+.login-form-container label {
     display: block;
     font-weight: bold;
-  }
-  
-  .login-form-container .error-text {
-    margin-top: 0.25rem;
-    color: #ff4d6d;
+    margin-bottom: 0.75rem;
+    color: #555555;
+}
+
+.login-form-container .error-text {
+    margin-top: 0.5rem;
+    color: #e74c3c;
     font-size: 0.875rem;
     display: none;
-  }
-  
-  .login-form-container .error-text.block {
+}
+
+.login-form-container .error-text.block {
     display: block;
-  }
-  
-  .login-form-container button {
+}
+
+.login-form-container input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid #cccccc;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: border 0.3s ease;
+}
+
+.login-form-container input:focus {
+    border-color: #6200ff;
+    outline: none;
+}
+
+.login-form-container button {
     background: #6200ff;
-    color: white;
-    padding: 0.5rem 1rem;
-    font-weight: 500;
+    color: #ffffff;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.3s;
-  }
-  
-  .login-form-container button:hover {
+    transition: background 0.3s ease, transform 0.2s;
+    border: none;
+    border-radius: 0.5rem;
+    width: 100%;
+}
+
+.login-form-container button:hover {
     background: #2681e2;
-  }
-  
-  .login-form-container .signup-link {
-    padding-top: 1rem;
-  }
-  
-  .login-form-container .signup-link a {
+    transform: translateY(-2px);
+}
+
+.login-form-container button:active {
+    transform: translateY(1px);
+}
+
+.login-form-container .signup-link {
+    text-align: center;
+    padding-top: 1.5rem;
+}
+
+.login-form-container .signup-link a {
     color: #3498db;
-  }
-  
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.login-form-container .signup-link a:hover {
+    text-decoration: underline;
+}

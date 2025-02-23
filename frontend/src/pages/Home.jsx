@@ -27,7 +27,7 @@ const Home = () => {
         </div>
       ) : (
         <>
-          <center><h6 className="welcome-header">Here are the tasks listed by {user?.name || "User"}</h6></center>
+          <center><h6 className="header">Here are the tasks listed by {user?.name || "User"}</h6></center>
           <Tasks />
         </>
       )}

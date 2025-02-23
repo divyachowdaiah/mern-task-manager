@@ -1,10 +1,9 @@
 /* MainLayout.css */
 
 .main-layout {
-    position: relative;
-    background-color: #bacde0; 
-    height: 100vh;
-    width: 100vw;
-    overflow-x: hidden;
-  }
-  
+  position: relative;
+  background-color: #f4f7fa; /* Light grayish-blue background for a professional look */
+  height: 100vh;
+  width: 100vw;
+  overflow-x: hidden;
+}
